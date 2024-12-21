@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Language Drag Race</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: /* light grey */ #f5f5f5;
+      }
+      .track {
+        display: flex;
+        border: 1px solid /* dark grey */ #333;
+        border-radius: 1rem;
+        width: 80%;
+        height: 100px;
+        background-color: /* dark grey */ #333;
+        align-items: center;
+        margin-top: 1rem;
+        position: relative;
+      }
+
+      .track h1 {
+        color: white;
+        margin-left: 0.5rem;
+        display: block;
+        width: 12rem;
+        font-size: 1rem;
+        border-right: 1px solid /* dark grey */ white;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .ball {
+        position: absolute;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background: /* gradient */ linear-gradient(
+          to bottom right,
+          #f00,
+          #f555
+        );
+        left: 0%;
+      }
+      .ball-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        margin-right: 3rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      @media screen and (min-width: 768px) {
+        .track h1 {
+          font-size: 1.5rem;
+        }
+        .ball {
+          width: 5rem;
+          height: 5rem;
+        }
+        .ball-container {
+          margin-right: 5rem;
+        }
+      }
+
+      @media screen and (min-width: 1024px) {
+        .track h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="timeline"></div>
+
+    <script type="application/javascript">
+      const benchMarksTimeInNS = {
+        Java: [],
+        JavaScript: [],
+        Cpp: [],
+        FlowWing: [],
+      };
+      const avgTimes = {
+        Java: 0,
+        JavaScript: 0,
+        Cpp: 0,
+        FlowWing: 0,
+      };
+      const allLanguageBalls = {};
+      async function loadBenchMarks() {
+        return fetch("../benchmark_results.csv").then((response) =>
+          response.text()
+        );
+      }
+
+      async function parseBenchmarkData() {
+        try {
+          const lines = (await loadBenchMarks()).trim().split("\n");
+          for (let i = 1; i < lines.length; i++) {
+            const [language, time] = lines[i].split(":");
+            benchMarksTimeInNS[language].push(time.replace(/,/g, ""));
+          }
+          for (const key in benchMarksTimeInNS) {
+            avgTimes[key] = getAverageTimeInSeconds(benchMarksTimeInNS[key]);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      function getAverageTimeInSeconds(timesInNenoSeconds) {
+        console.log("timesInNenoSeconds", timesInNenoSeconds);
+        const times = timesInNenoSeconds.reduce(
+          (acc, time) => acc + time / 1e9,
+          0
+        );
+        return times / timesInNenoSeconds.length;
+      }
+
+      function displayTracks() {
+        for (const key in benchMarksTimeInNS) {
+          console.log(key);
+          const track = document.createElement("div");
+          track.classList.add("track");
+          const h1 = document.createElement("h1");
+          h1.textContent = key;
+          track.appendChild(h1);
+          const ballContainer = document.createElement("div");
+          ballContainer.classList.add("ball-container");
+
+          const ball = document.createElement("div");
+          ball.classList.add("ball");
+          ball.style.background = `linear-gradient(to bottom right, ${
+            key === "Java"
+              ? "#f00, #f555"
+              : key === "JavaScript"
+              ? "#0f0, #5ff5"
+              : key === "Cpp"
+              ? "#f0f, #f555"
+              : "#00f , #55f"
+          })`;
+          ball.classList.add(key);
+          allLanguageBalls[key] = ball;
+          ballContainer.appendChild(ball);
+
+          track.appendChild(ballContainer);
+
+          document.body.appendChild(track);
+        }
+      }
+      function moveBall() {
+        const initialPercentages = {
+          Java: 0,
+          JavaScript: 0,
+          Cpp: 0,
+          FlowWing: 0,
+        };
+        let factor = 100;
+        setInterval(() => {
+          for (const key in allLanguageBalls) {
+            initialPercentages[key] += ((1 - avgTimes[key]) * 100) / factor;
+            if (initialPercentages[key] > 100) {
+              initialPercentages[key] = 100;
+            }
+            allLanguageBalls[key].style.transition = "left 0.1s ease-out";
+            allLanguageBalls[key].style.left = `${initialPercentages[key]}%`;
+          }
+        }, 50);
+      }
+
+      (async () => {
+        await parseBenchmarkData();
+        displayTracks();
+        console.log(avgTimes);
+        moveBall();
+      })();
+      // Initialize an object to hold the times for each language
+      const times = {
+        Java: [],
+        JavaScript: [],
+        Cpp: [],
+      };
+    </script>
+  </body>
+</html>

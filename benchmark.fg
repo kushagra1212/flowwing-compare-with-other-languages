@@ -1,0 +1,5 @@
+var sum: int = 0
+for (var i: int = 0 to 10000) {
+  sum = sum + i 
+}
+print(sum, "\n")
