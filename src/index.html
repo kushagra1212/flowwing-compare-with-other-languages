@@ -89,12 +89,14 @@
 
     <script type="application/javascript">
       const benchMarksTimeInNS = {
+        Python: [],
         Java: [],
         JavaScript: [],
         Cpp: [],
         FlowWing: [],
       };
       const avgTimes = {
+        Python: 0,
         Java: 0,
         JavaScript: 0,
         Cpp: 0,
@@ -111,7 +113,7 @@
         try {
           const lines = (await loadBenchMarks()).trim().split("\n");
           for (let i = 1; i < lines.length; i++) {
-            const [language, time] = lines[i].split(":");
+            const [language, index, time] = lines[i].split(",");
             benchMarksTimeInNS[language].push(time.replace(/,/g, ""));
           }
           for (const key in benchMarksTimeInNS) {
@@ -131,6 +133,18 @@
         return times / timesInNenoSeconds.length;
       }
 
+      function getColor(language) {
+        return language === "Java"
+          ? "#f00, #f555"
+          : language === "JavaScript"
+          ? "#0f0, #5ff5"
+          : language === "Cpp"
+          ? "#f0f, #f555"
+          : language === "Python"
+          ? "#f5f, #f555"
+          : "#00f , #55f";
+      }
+
       function displayTracks() {
         for (const key in benchMarksTimeInNS) {
           console.log(key);
@@ -144,15 +158,9 @@
 
           const ball = document.createElement("div");
           ball.classList.add("ball");
-          ball.style.background = `linear-gradient(to bottom right, ${
-            key === "Java"
-              ? "#f00, #f555"
-              : key === "JavaScript"
-              ? "#0f0, #5ff5"
-              : key === "Cpp"
-              ? "#f0f, #f555"
-              : "#00f , #55f"
-          })`;
+          ball.style.background = `linear-gradient(to bottom right, ${getColor(
+            key
+          )})`;
           ball.classList.add(key);
           allLanguageBalls[key] = ball;
           ballContainer.appendChild(ball);
@@ -164,22 +172,31 @@
       }
       function moveBall() {
         const initialPercentages = {
+          Python: 0,
           Java: 0,
           JavaScript: 0,
           Cpp: 0,
           FlowWing: 0,
         };
-        let factor = 100;
-        setInterval(() => {
+
+        const maxTime = Math.max(...Object.values(avgTimes));
+        const slowness = 50;
+        const interval = setInterval(() => {
           for (const key in allLanguageBalls) {
-            initialPercentages[key] += ((1 - avgTimes[key]) * 100) / factor;
+            const amount = ((1 / slowness) * maxTime) / avgTimes[key];
+
+            initialPercentages[key] += amount;
             if (initialPercentages[key] > 100) {
               initialPercentages[key] = 100;
             }
-            allLanguageBalls[key].style.transition = "left 0.1s ease-out";
+            allLanguageBalls[key].style.transition = "left 0.01s ease-out";
             allLanguageBalls[key].style.left = `${initialPercentages[key]}%`;
           }
         }, 30);
+
+        setTimeout(() => {
+          clearInterval(interval);
+        }, 30000);
       }
 
       (async () => {
@@ -188,12 +205,6 @@
         console.log(avgTimes);
         moveBall();
       })();
-      // Initialize an object to hold the times for each language
-      const times = {
-        Java: [],
-        JavaScript: [],
-        Cpp: [],
-      };
     </script>
   </body>
 </html>

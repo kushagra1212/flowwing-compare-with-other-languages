@@ -8,6 +8,9 @@ output_file="benchmark_results.csv"
 
 echo "Language,Run,Time_ns" > "$output_file"
 
+
+
+
 # Helper function to extract nanoseconds from time output
 extract_ns() {
     local time_output="$1"
@@ -23,13 +26,15 @@ extract_ns() {
     echo "$nanoseconds"
 }
 
+
+
 # Java
 javac Benchmark.java  # Compile once outside the loop
 for ((i=1; i<=$runs; i++))
 do
     time_output=$( { time java Benchmark; } 2>&1 ) # Capture output and stderr
     time_ns=$(extract_ns "$time_output")
-    echo "Java:$i,$time_ns" >> "$output_file"
+    echo "Java,$i,$time_ns" >> "$output_file"
 done
 
 # Javascript
@@ -37,7 +42,7 @@ for ((i=1; i<=$runs; i++))
 do
     time_output=$( { time node benchmark.js; } 2>&1 )
     time_ns=$(extract_ns "$time_output")
-    echo "JavaScript:$i,$time_ns" >> "$output_file"
+    echo "JavaScript,$i,$time_ns" >> "$output_file"
 done
 
 # C++
@@ -46,7 +51,7 @@ for ((i=1; i<=$runs; i++))
 do
     time_output=$( { time ./benchmark; } 2>&1 )
     time_ns=$(extract_ns "$time_output")
-    echo "Cpp:$i,$time_ns" >> "$output_file"
+    echo "Cpp,$i,$time_ns" >> "$output_file"
 done
 
 # FlowWing
@@ -55,7 +60,15 @@ for ((i=1; i<=$runs; i++))
 do
     time_output=$( { time ./build/bin/benchmark; } 2>&1 )
     time_ns=$(extract_ns "$time_output")
-    echo "FlowWing:$i,$time_ns" >> "$output_file"
+    echo "FlowWing,$i,$time_ns" >> "$output_file"
 done
 
+
+# Python
+for ((i=1; i<=$runs; i++))
+do
+    time_output=$( { time python3 benchmark.py; } 2>&1 )
+    time_ns=$(extract_ns "$time_output")
+    echo "Python,$i,$time_ns" >> "$output_file"
+done
 echo "Benchmark finished. Results saved in $output_file"

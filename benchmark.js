@@ -1,5 +1,17 @@
-let sum = 0;
-for (let i = 1; i <= 10000; i++) {
-  sum += i;
+function findPrimes() {
+  for (let i = 2; i <= 100000; i++) {
+    if (isPrime(i)) {
+      console.log(i);
+    }
+  }
 }
-console.log(sum);
+
+function isPrime(num) {
+  if (num < 2) return false;
+  for (let i = 2; i <= Math.sqrt(num); i++) {
+    if (num % i === 0) return false;
+  }
+  return true;
+}
+
+findPrimes();

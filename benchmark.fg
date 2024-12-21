@@ -1,5 +1,28 @@
-var sum: int = 0
-for var i: int = 1 to 10000 {
-  sum = sum + i 
+
+fun sqrt(num: as deci) -> as deci decl
+
+
+fun isPrime(inout num: int) -> bool {
+  if num < 2 {
+    return false
+  }
+  var decimal: deci = Decimal(num)
+  var sqrt: int = Int32(sqrt(decimal))
+  for var i: int = 2 to sqrt {
+    if num % i == 0 {
+      return false
+    }
+  }
+  return true
 }
-print(sum, "\n")
+
+
+fun findPrimes() -> nthg {
+  for var i: int = 2 to 100000 {
+    if isPrime(i) {
+      print(i, "\n")
+    }
+  }
+}
+
+findPrimes()
